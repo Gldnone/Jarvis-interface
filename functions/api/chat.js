@@ -54,11 +54,17 @@ export async function onRequestPost(context) {
     const data = await response.json();
 
     if (!response.ok) {
-      return Response.json(
-        { error: "The AI service returned an error. Check the API configuration and model availability." },
-        { status: 502 }
-      );
-    }
+  console.error("Gemini API error:", response.status, data);
+
+  return Response.json(
+    {
+      error: "Gemini request failed.",
+      upstreamStatus: response.status,
+      details: data?.error?.message || "No additional details available."
+    },
+    { status: 502 }
+  );
+}
 
     const reply =
       data?.candidates?.[0]?.content?.parts
