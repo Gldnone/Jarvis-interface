@@ -1,0 +1,402 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050b12">
+<title>J.A.R.V.I.S.</title>
+<style>
+:root {
+  --cyan: #54f6ff;
+  --blue: #1389b7;
+  --bg: #050b12;
+  --panel: rgba(8, 28, 42, .84);
+  --muted: #7295a8;
+  --line: rgba(84, 246, 255, .27);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% 25%, #103247 0%, transparent 48%),
+    linear-gradient(160deg, #07111c, #02060b 80%);
+  color: #dffcff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: .5px;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .14;
+  background-image:
+    linear-gradient(rgba(84,246,255,.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(84,246,255,.13) 1px, transparent 1px);
+  background-size: 30px 30px;
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+button, input { font: inherit; }
+button { cursor: pointer; }
+.app {
+  max-width: 760px;
+  margin: auto;
+  padding: max(22px, env(safe-area-inset-top)) 18px 30px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.brand { color: var(--cyan); font-size: 21px; font-weight: 800; }
+.sub { color: var(--muted); font-size: 10px; margin-top: 5px; }
+.status { font-size: 10px; color: var(--cyan); }
+.dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan);
+  margin-right: 6px;
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 17px;
+  box-shadow: inset 0 0 25px rgba(20,150,190,.035);
+}
+.label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+}
+.hero { text-align: center; padding: 22px 12px 18px; }
+.reactor {
+  width: 164px;
+  height: 164px;
+  margin: 16px auto 20px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 20px #20cce433, inset 0 0 20px #20cce422;
+  animation: breathe 3s ease-in-out infinite;
+}
+.reactor::before, .reactor::after {
+  content: "";
+  position: absolute;
+  border: 1px solid #27b6d7;
+  border-radius: 50%;
+}
+.reactor::before { inset: 12px; border-style: dashed; animation: spin 18s linear infinite; }
+.reactor::after { inset: 28px; border-color: #a0fcff; box-shadow: 0 0 24px #54f6ff55; }
+.core {
+  width: 45px; height: 45px;
+  background: radial-gradient(circle, white, var(--cyan) 35%, #0783ae 72%);
+  clip-path: polygon(50% 0, 90% 24%, 90% 76%, 50% 100%, 10% 76%, 10% 24%);
+  z-index: 1;
+  filter: drop-shadow(0 0 13px var(--cyan));
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes breathe {
+  50% { box-shadow: 0 0 35px #20cce466, inset 0 0 30px #20cce433; }
+}
+h1 { font-size: 27px; letter-spacing: 5px; margin: 8px 0; }
+.tagline { color: var(--muted); font-size: 11px; line-height: 1.7; }
+.pill {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  color: var(--cyan);
+  font-size: 10px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.metric {
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #071824a8;
+}
+.metric .value { color: var(--cyan); font-size: 16px; margin-top: 9px; }
+.metric .small { color: var(--muted); font-size: 10px; margin-top: 5px; }
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: var(--cyan);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+}
+.messages {
+  height: 190px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 4px 0 12px;
+}
+.message {
+  font-size: 12px;
+  line-height: 1.65;
+  padding: 10px 12px;
+  border-left: 2px solid var(--cyan);
+  background: #0a202c;
+  overflow-wrap: anywhere;
+}
+.message.user {
+  border-left-color: #4289ff;
+  background: #101d30;
+}
+.message .who {
+  display: block;
+  color: var(--cyan);
+  font-size: 9px;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+.input-row { display: flex; gap: 8px; }
+input {
+  min-width: 0;
+  flex: 1;
+  background: #020b12;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 13px 10px;
+  color: white;
+  outline: none;
+}
+input:focus { border-color: var(--cyan); }
+.btn {
+  color: var(--cyan);
+  background: #092432;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px 13px;
+}
+.btn:active { background: #12475a; }
+.btn.primary { background: #0b3745; }
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.quick .btn { font-size: 10px; padding: 9px; }
+footer {
+  text-align: center;
+  color: #507181;
+  font-size: 9px;
+  line-height: 1.8;
+  padding: 20px 4px;
+}
+#clock { color: var(--cyan); }
+@media (max-width: 380px) {
+  .app { padding-left: 12px; padding-right: 12px; }
+  .reactor { width: 142px; height: 142px; }
+  h1 { font-size: 23px; }
+  .panel { padding: 13px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <div class="brand">J.A.R.V.I.S.</div>
+      <div class="sub">PERSONAL ASSISTANT INTERFACE</div>
+    </div>
+    <div class="status"><span class="dot"></span>INTERFACE ONLINE</div>
+  </header>
+
+  <section class="panel hero">
+    <div class="label">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+    <div class="reactor"><div class="core"></div></div>
+    <h1>GOOD EVENING</h1>
+    <div class="tagline">AT YOUR SERVICE, SIR.<br>AWAITING YOUR INSTRUCTIONS.</div>
+    <div class="pill" id="state">LOCAL SYSTEM READY</div>
+  </section>
+
+  <div class="grid">
+    <div class="metric">
+      <div class="label">SYSTEM STATUS</div>
+      <div class="value">OPERATIONAL</div>
+      <div class="small">Interface running locally</div>
+    </div>
+    <div class="metric">
+      <div class="label">AI CONNECTION</div>
+      <div class="value" id="ai">NOT CONNECTED</div>
+      <div class="small">Backend setup pending</div>
+    </div>
+    <div class="metric">
+      <div class="label">LOCAL TIME</div>
+      <div class="value" id="clock">--:--:--</div>
+      <div class="small" id="date">Loading date...</div>
+    </div>
+    <div class="metric">
+      <div class="label">TASKS</div>
+      <div class="value" id="taskCount">00</div>
+      <div class="small">Demo session tasks</div>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="section-title">
+      <span>COMMAND CONSOLE</span>
+      <span>SECURE LOCAL DEMO</span>
+    </div>
+    <div class="messages" id="messages" aria-live="polite">
+      <div class="message">
+        <span class="who">JARVIS // SYSTEM</span>
+        Interface initialized. I am currently running in demonstration mode. The cloud AI connection has not been configured.
+      </div>
+    </div>
+    <form id="chatForm">
+      <div class="input-row">
+        <input id="command" placeholder="Enter a command..." autocomplete="off" aria-label="Enter a command">
+        <button class="btn primary" type="submit">SEND</button>
+      </div>
+    </form>
+    <div class="quick">
+      <button class="btn" data-cmd="status">SYSTEM STATUS</button>
+      <button class="btn" data-cmd="time">TIME</button>
+      <button class="btn" data-cmd="task">NEW TASK</button>
+      <button class="btn" id="voice">🎙 VOICE</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="section-title"><span>MISSION LOG</span><span>SESSION</span></div>
+    <div class="tagline" id="log">System started. Awaiting first command.</div>
+  </section>
+
+  <footer>
+    J.A.R.V.I.S. PERSONAL PROJECT<br>
+    FRONTEND PROTOTYPE · CLOUD AI NOT YET CONNECTED<br>
+    EXCELSIOR
+  </footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let tasks = [];
+let recognition = null;
+
+function updateClock() {
+  const now = new Date();
+  $('clock').textContent = now.toLocaleTimeString([], {
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+  $('date').textContent = now.toLocaleDateString([], {
+    weekday: 'short', month: 'short', day: 'numeric'
+  });
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+function addMessage(who, text, user = false) {
+  const msg = document.createElement('div');
+  msg.className = 'message' + (user ? ' user' : '');
+  const label = document.createElement('span');
+  label.className = 'who';
+  label.textContent = who;
+  const body = document.createElement('div');
+  body.textContent = text;
+  msg.append(label, body);
+  $('messages').appendChild(msg);
+  $('messages').scrollTop = $('messages').scrollHeight;
+  $('log').textContent = new Date().toLocaleTimeString() + ' — ' + who + ': ' + text;
+}
+
+function respond(command) {
+  const c = command.toLowerCase().trim();
+  if (!c) return;
+  addMessage('YOU', command, true);
+  let answer;
+
+  if (/\b(hello|hi|hey)\b/.test(c)) {
+    answer = 'Greetings, sir. JARVIS interface is ready. My cloud intelligence has not yet been connected.';
+  } else if (c.includes('time') || c.includes('date')) {
+    answer = 'Your device reports: ' + new Date().toLocaleString() + '.';
+  } else if (c.includes('status')) {
+    answer = 'Interface operational. Local commands enabled. Cloud AI, persistent cloud memory, and autonomous scheduling are not yet configured.';
+  } else if (c.includes('task')) {
+    const task = prompt('Sir, what task shall I add?');
+    if (task && task.trim()) {
+      tasks.push(task.trim());
+      $('taskCount').textContent = String(tasks.length).padStart(2, '0');
+      answer = 'Task added to this temporary session: ' + task.trim() + '. It will not persist after the page is reloaded.';
+    } else {
+      answer = 'No task was added.';
+    }
+  } else if (c.includes('help')) {
+    answer = 'Available demo commands: hello, status, time, date, task, and help. General AI reasoning will be available after the backend is connected.';
+  } else {
+    answer = 'I have received your command, sir, but the AI engine is not connected yet. For now, try status, time, task, or help.';
+  }
+
+  setTimeout(() => addMessage('JARVIS', answer), 180);
+}
+
+$('chatForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const input = $('command');
+  const value = input.value.trim();
+  if (value) respond(value);
+  input.value = '';
+});
+
+document.querySelectorAll('[data-cmd]').forEach(button => {
+  button.addEventListener('click', () => {
+    if (button.dataset.cmd === 'task') {
+      respond('task');
+    } else {
+      respond(button.dataset.cmd);
+    }
+  });
+});
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.onstart = () => $('state').textContent = 'LISTENING...';
+  recognition.onresult = e => {
+    $('command').value = e.results[0][0].transcript;
+    $('state').textContent = 'LOCAL SYSTEM READY';
+    $('chatForm').requestSubmit();
+  };
+  recognition.onerror = () => $('state').textContent = 'VOICE UNAVAILABLE';
+  recognition.onend = () => {
+    if ($('state').textContent === 'LISTENING...') {
+      $('state').textContent = 'LOCAL SYSTEM READY';
+    }
+  };
+  $('voice').addEventListener('click', () => {
+    try { recognition.start(); }
+    catch (_) { $('state').textContent = 'VOICE BUSY — TRY AGAIN'; }
+  });
+} else {
+  $('voice').addEventListener('click', () => {
+    addMessage('JARVIS', 'Voice recognition is not supported in this browser session. Please use the text command field.');
+  });
+}
+</script>
+</body>
+</html>
+
