@@ -2,567 +2,524 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#050b12">
-<title>J.A.R.V.I.S.</title>
-<style>
-:root {
-  --cyan: #54f6ff;
-  --blue: #1389b7;
-  --bg: #050b12;
-  --panel: rgba(8, 28, 42, .84);
-  --muted: #7295a8;
-  --line: rgba(84, 246, 255, .27);
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  min-height: 100vh;
-  background:
-    radial-gradient(ellipse at 50% 25%, #103247 0%, transparent 48%),
-    linear-gradient(160deg, #07111c, #02060b 80%);
-  color: #dffcff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  letter-spacing: .5px;
-}
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: .14;
-  background-image:
-    linear-gradient(rgba(84,246,255,.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(84,246,255,.13) 1px, transparent 1px);
-  background-size: 30px 30px;
-  mask-image: linear-gradient(to bottom, black, transparent);
-}
-button, input { font: inherit; }
-button { cursor: pointer; }
-.app {
-  max-width: 760px;
-  margin: auto;
-  padding: max(22px, env(safe-area-inset-top)) 18px 30px;
-}
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--line);
-}
-.brand { color: var(--cyan); font-size: 21px; font-weight: 800; }
-.sub { color: var(--muted); font-size: 10px; margin-top: 5px; }
-.status { font-size: 10px; color: var(--cyan); }
-.dot {
-  display: inline-block;
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 12px var(--cyan);
-  margin-right: 6px;
-}
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 16px;
-  margin-top: 17px;
-  box-shadow: inset 0 0 25px rgba(20,150,190,.035);
-}
-.label {
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: var(--muted);
-}
-.hero { text-align: center; padding: 22px 12px 18px; }
-.reactor {
-  width: 164px;
-  height: 164px;
-  margin: 16px auto 20px;
-  position: relative;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--cyan);
-  border-radius: 50%;
-  box-shadow: 0 0 20px #20cce433, inset 0 0 20px #20cce422;
-  animation: breathe 3s ease-in-out infinite;
-}
-.reactor::before, .reactor::after {
-  content: "";
-  position: absolute;
-  border: 1px solid #27b6d7;
-  border-radius: 50%;
-}
-.reactor::before { inset: 12px; border-style: dashed; animation: spin 18s linear infinite; }
-.reactor::after { inset: 28px; border-color: #a0fcff; box-shadow: 0 0 24px #54f6ff55; }
-.core {
-  width: 45px; height: 45px;
-  background: radial-gradient(circle, white, var(--cyan) 35%, #0783ae 72%);
-  clip-path: polygon(50% 0, 90% 24%, 90% 76%, 50% 100%, 10% 76%, 10% 24%);
-  z-index: 1;
-  filter: drop-shadow(0 0 13px var(--cyan));
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes breathe {
-  50% { box-shadow: 0 0 35px #20cce466, inset 0 0 30px #20cce433; }
-}
-h1 { font-size: 27px; letter-spacing: 5px; margin: 8px 0; }
-.tagline { color: var(--muted); font-size: 11px; line-height: 1.7; }
-.pill {
-  display: inline-block;
-  margin-top: 14px;
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: 30px;
-  color: var(--cyan);
-  font-size: 10px;
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 16px;
-}
-.metric {
-  padding: 13px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: #071824a8;
-}
-.metric .value { color: var(--cyan); font-size: 16px; margin-top: 9px; }
-.metric .small { color: var(--muted); font-size: 10px; margin-top: 5px; }
-.section-title {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 14px;
-  color: var(--cyan);
-  font-size: 11px;
-  letter-spacing: 1.5px;
-}
-.messages {
-  height: 190px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-  padding: 4px 0 12px;
-}
-.message {
-  font-size: 12px;
-  line-height: 1.65;
-  padding: 10px 12px;
-  border-left: 2px solid var(--cyan);
-  background: #0a202c;
-  overflow-wrap: anywhere;
-}
-.message.user {
-  border-left-color: #4289ff;
-  background: #101d30;
-}
-.message .who {
-  display: block;
-  color: var(--cyan);
-  font-size: 9px;
-  margin-bottom: 4px;
-  letter-spacing: 1px;
-}
-.input-row { display: flex; gap: 8px; }
-input {
-  min-width: 0;
-  flex: 1;
-  background: #020b12;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 13px 10px;
-  color: white;
-  outline: none;
-}
-input:focus { border-color: var(--cyan); }
-.btn {
-  color: var(--cyan);
-  background: #092432;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 11px 13px;
-}
-.btn:active { background: #12475a; }
-.btn.primary { background: #0b3745; }
-.quick {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-.quick .btn { font-size: 10px; padding: 9px; }
-footer {
-  text-align: center;
-  color: #507181;
-  font-size: 9px;
-  line-height: 1.8;
-  padding: 20px 4px;
-}
-#clock { color: var(--cyan); }
-@media (max-width: 380px) {
-  .app { padding-left: 12px; padding-right: 12px; }
-  .reactor { width: 142px; height: 142px; }
-  h1 { font-size: 23px; }
-  .panel { padding: 13px; }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#050b12" />
+  <title>J.A.R.V.I.S. // Personal Interface</title>
+  <style>
+    :root {
+      --bg:#050b12;--panel:rgba(8,24,36,.82);--panel-strong:rgba(8,28,42,.96);
+      --cyan:#56eaff;--cyan-soft:rgba(86,234,255,.18);--blue:#1689b9;
+      --text:#d9faff;--muted:#80aeba;--green:#72ffd1;--red:#ff6b83;
+      --line:rgba(86,234,255,.28);--shadow:0 0 24px rgba(30,199,255,.12);
+    }
+    *{box-sizing:border-box}
+    html{min-height:100%;background:var(--bg)}
+    body{
+      margin:0;min-height:100vh;color:var(--text);
+      background:radial-gradient(ellipse at 50% -15%,rgba(16,123,160,.26),transparent 55%),radial-gradient(ellipse at 90% 85%,rgba(0,103,160,.12),transparent 40%),var(--bg);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      letter-spacing:.035em;overflow-x:hidden
+    }
+    body::before{
+      content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;z-index:0;
+      background-image:linear-gradient(rgba(86,234,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(86,234,255,.055) 1px,transparent 1px);
+      background-size:36px 36px;mask-image:linear-gradient(to bottom,black,transparent 90%)
+    }
+    body::after{
+      content:"";position:fixed;inset:0;pointer-events:none;z-index:10;opacity:.06;
+      background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(130,245,255,.35) 4px)
+    }
+    button,input,textarea{font:inherit}button{color:inherit}
+    .app{position:relative;z-index:1;width:min(1400px,100%);margin:0 auto;padding:22px clamp(14px,3vw,34px) 28px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:17px;border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:13px;min-width:0}
+    .brand-mark{
+      width:44px;height:44px;flex:0 0 auto;display:grid;place-items:center;
+      border:1px solid var(--cyan);border-radius:50%;color:var(--cyan);
+      box-shadow:0 0 20px var(--cyan-soft),inset 0 0 14px var(--cyan-soft);
+      font-size:13px;font-weight:800;letter-spacing:-.06em
+    }
+    .brand h1{margin:0;font-size:clamp(15px,2.3vw,21px);letter-spacing:.18em;font-weight:600}
+    .eyebrow{color:var(--muted);font-size:10px;letter-spacing:.2em;margin-top:5px}
+    .top-status{display:flex;align-items:center;gap:9px;color:var(--green);font-size:10px;white-space:nowrap}
+    .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:pulse 1.8s infinite}
+    @keyframes pulse{50%{opacity:.35;box-shadow:0 0 3px var(--green)}}
+    .hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:20px;padding:22px 0}
+    .panel{min-width:0;background:linear-gradient(145deg,rgba(12,34,48,.82),rgba(4,15,24,.82));border:1px solid var(--line);box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .panel::before,.panel::after{content:"";position:absolute;width:22px;height:22px;pointer-events:none;border-color:var(--cyan);opacity:.8}
+    .panel::before{top:0;left:0;border-top:2px solid;border-left:2px solid}
+    .panel::after{right:0;bottom:0;border-right:2px solid;border-bottom:2px solid}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid rgba(86,234,255,.16);color:var(--muted);font-size:10px;letter-spacing:.16em}
+    .panel-content{padding:18px}
+    .welcome{display:flex;flex-direction:column;justify-content:center;min-height:238px}
+    .welcome .overline{color:var(--cyan);font-size:10px;letter-spacing:.25em}
+    .welcome h2{margin:13px 0 8px;font-size:clamp(28px,5vw,53px);line-height:1.04;letter-spacing:.08em;font-weight:500;text-shadow:0 0 24px rgba(86,234,255,.2)}
+    .welcome p{max-width:590px;margin:0;color:#9dc5d0;line-height:1.7;font-size:12px}
+    .welcome .welcome-foot{margin-top:22px;display:flex;align-items:center;gap:10px;color:var(--green);font-size:10px;letter-spacing:.14em}
+    .mini-bar{height:3px;width:44px;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+    .reactor-wrap{display:grid;place-items:center;min-height:238px;padding:14px;background:radial-gradient(circle,rgba(28,160,200,.10),transparent 65%)}
+    .reactor{width:min(210px,58vw);aspect-ratio:1;position:relative;display:grid;place-items:center;border-radius:50%;background:repeating-radial-gradient(circle,transparent 0 22px,rgba(86,234,255,.12) 23px 24px)}
+    .reactor::before,.reactor::after{content:"";position:absolute;border-radius:50%;inset:8%;border:1px solid rgba(86,234,255,.55);box-shadow:0 0 22px rgba(86,234,255,.12),inset 0 0 18px rgba(86,234,255,.1)}
+    .reactor::before{border-top-color:transparent;border-bottom-color:transparent;animation:spin 12s linear infinite}
+    .reactor::after{inset:18%;border-left-color:transparent;border-right-color:transparent;animation:spin 8s linear infinite reverse}
+    .reactor-core{width:35%;aspect-ratio:1;border-radius:50%;border:2px solid #b6faff;background:radial-gradient(circle,#eaffff 0%,#5beaff 24%,#0874a5 58%,#061c30 75%);box-shadow:0 0 22px #56eaff,0 0 55px rgba(86,234,255,.45);animation:corebeat 3s ease-in-out infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes corebeat{50%{transform:scale(.93);opacity:.8}}
+    .reactor-label{position:absolute;bottom:-3px;color:var(--cyan);font-size:9px;letter-spacing:.25em}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+    .stat{padding:15px 16px;background:rgba(5,21,32,.75);border:1px solid rgba(86,234,255,.2)}
+    .stat-label{color:var(--muted);font-size:9px;letter-spacing:.16em}
+    .stat-value{margin-top:9px;color:var(--cyan);font-size:clamp(16px,2.5vw,25px);letter-spacing:.06em}
+    .stat-sub{margin-top:5px;color:#628b98;font-size:9px}
+    .main-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(260px,.55fr);gap:20px;align-items:start}
+    .chat-panel{min-height:475px}
+    .chat-tools{display:flex;align-items:center;gap:8px}
+    .tiny-state{color:var(--green);font-size:9px}
+    #messages{height:340px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;scrollbar-color:rgba(86,234,255,.35) transparent}
+    .message{max-width:92%;padding:12px 14px;border-left:2px solid var(--cyan);background:rgba(13,42,57,.58);line-height:1.65;font-size:12px;overflow-wrap:anywhere;animation:appear .25s ease-out}
+    .message.user{align-self:flex-end;border-left:0;border-right:2px solid var(--blue);background:rgba(8,42,63,.65)}
+    .who{display:block;margin-bottom:5px;color:var(--cyan);font-size:9px;letter-spacing:.16em}
+    .message.user .who{color:#89bfff;text-align:right}
+    @keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    .composer{display:flex;gap:9px;padding:13px;border-top:1px solid rgba(86,234,255,.2);background:rgba(2,12,20,.5)}
+    .composer input{flex:1;min-width:0;border:1px solid rgba(86,234,255,.28);border-radius:0;padding:13px 12px;color:var(--text);outline:none;background:rgba(1,10,17,.8);font-size:12px}
+    .composer input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(86,234,255,.1)}
+    .composer input::placeholder{color:#557985}
+    .btn{border:1px solid var(--cyan);background:rgba(24,137,185,.16);color:var(--cyan);padding:11px 14px;font-size:10px;letter-spacing:.12em;cursor:pointer;transition:.2s ease;text-transform:uppercase}
+    .btn:hover{background:rgba(86,234,255,.16);box-shadow:0 0 14px rgba(86,234,255,.14)}
+    .btn:disabled{opacity:.4;cursor:wait}
+    .btn.secondary{border-color:rgba(86,234,255,.3);color:#a9dbe5}
+    .btn.active{background:rgba(86,234,255,.22)}
+    .below-chat{padding:0 14px 14px;display:flex;gap:8px;flex-wrap:wrap}
+    .below-chat .btn{padding:8px 10px;font-size:9px}
+    .side-stack{display:grid;gap:20px}
+    .command-list{display:grid;gap:9px}
+    .command-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;color:#a8d4de}
+    .command-row code{color:var(--cyan);font-size:10px}
+    .command-row button{border:1px solid rgba(86,234,255,.22);background:transparent;color:var(--muted);padding:6px 8px;font-size:9px;cursor:pointer}
+    .command-row button:hover{color:var(--cyan);border-color:var(--cyan)}
+    .divider{height:1px;background:rgba(86,234,255,.14);margin:13px 0}
+    .system-line{display:flex;justify-content:space-between;gap:10px;margin:12px 0;font-size:10px;color:var(--muted)}
+    .system-line strong{font-weight:500;color:var(--green);text-align:right}
+    .system-line strong.warn{color:#ffd477}
+    .note{font-size:10px;line-height:1.7;color:#7297a3}
+    .footer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:15px;margin-top:22px;color:#527985;font-size:9px;letter-spacing:.13em}
+    .footer span:last-child{color:var(--cyan)}
+    @media(max-width:850px){
+      .hero,.main-grid{grid-template-columns:1fr}
+      .reactor-wrap{min-height:210px}
+      .reactor{width:165px}
+      .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .chat-panel{min-height:auto}
+      #messages{height:320px}
+    }
+    @media(max-width:480px){
+      .app{padding:14px 12px 22px}
+      .topbar{align-items:flex-start}
+      .top-status{font-size:8px;padding-top:6px}
+      .brand-mark{width:37px;height:37px}
+      .brand h1{font-size:14px}
+      .eyebrow{font-size:8px}
+      .panel-content{padding:14px}
+      .welcome{min-height:210px}
+      .composer{flex-wrap:wrap}
+      .composer input{flex-basis:100%}
+      .composer .btn{flex:1}
+      .message{max-width:100%}
+      .footer{align-items:flex-start;flex-direction:column}
+    }
+  </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div>
-      <div class="brand">J.A.R.V.I.S.</div>
-      <div class="sub">PERSONAL ASSISTANT INTERFACE</div>
-    </div>
-    <div class="status"><span class="dot"></span>INTERFACE ONLINE</div>
-  </header>
-
-  <section class="panel hero">
-    <div class="label">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
-    <div class="reactor"><div class="core"></div></div>
-    <h1 id="greeting">GOOD DAY</h1>
-    <div class="tagline">AT YOUR SERVICE, SIR.<br>AWAITING YOUR INSTRUCTIONS.</div>
-    <div class="pill" id="state">LOCAL SYSTEM READY</div>
-  </section>
-
-  <div class="grid">
-    <div class="metric">
-      <div class="label">SYSTEM STATUS</div>
-      <div class="value">OPERATIONAL</div>
-      <div class="small">Interface running locally</div>
-    </div>
-    <div class="metric">
-      <div class="label">AI CONNECTION</div>
-      <div class="value" id="ai">NOT CONNECTED</div>
-      <div class="small">Backend setup pending</div>
-    </div>
-    <div class="metric">
-      <div class="label">LOCAL TIME</div>
-      <div class="value" id="clock">--:--:--</div>
-      <div class="small" id="date">Loading date...</div>
-    </div>
-    <div class="metric">
-      <div class="label">TASKS</div>
-      <div class="value" id="taskCount">00</div>
-      <div class="small">Demo session tasks</div>
-    </div>
-  </div>
-
-  <section class="panel">
-    <div class="section-title">
-      <span>COMMAND CONSOLE</span>
-      <span>SECURE LOCAL DEMO</span>
-    </div>
-    <div class="messages" id="messages" aria-live="polite">
-      <div class="message">
-        <span class="who">JARVIS // SYSTEM</span>
-        Interface initialized. I am currently running in demonstration mode. The cloud AI connection has not been configured.
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">J.A</div>
+        <div>
+          <h1>J.A.R.V.I.S.</h1>
+          <div class="eyebrow">PERSONAL INTELLIGENCE SYSTEM // v2.0</div>
+        </div>
       </div>
-    </div>
-    <form id="chatForm">
-      <div class="input-row">
-        <input id="command" placeholder="Enter a command..." autocomplete="off" aria-label="Enter a command">
-        <button class="btn primary" type="submit">SEND</button>
+      <div class="top-status"><span class="pulse"></span><span id="topStatus">SYSTEM INITIALIZING</span></div>
+    </header>
+
+    <section class="hero">
+      <div class="panel welcome">
+        <div class="panel-content">
+          <div class="overline">PERSONAL ASSISTANT INTERFACE</div>
+          <h2 id="greeting">GOOD DAY</h2>
+          <p>All systems are standing by. Your interface is ready for commands, analysis, and conversation. How may I assist you today?</p>
+          <div class="welcome-foot"><span class="mini-bar"></span><span id="state">LOCAL SYSTEM READY</span></div>
+        </div>
       </div>
-    </form>
-    <div class="quick">
-      <button class="btn" data-cmd="status">SYSTEM STATUS</button>
-      <button class="btn" data-cmd="time">TIME</button>
-      <button class="btn" data-cmd="task">NEW TASK</button>
-      <button class="btn" id="voice">🎙 VOICE</button>
-    </div>
-  </section>
+      <div class="panel">
+        <div class="panel-head"><span>NEURAL CORE</span><span>LIVE VISUALIZATION</span></div>
+        <div class="reactor-wrap">
+          <div class="reactor" aria-label="Animated cyan reactor visualization">
+            <div class="reactor-core"></div>
+            <div class="reactor-label">J.A.R.V.I.S. CORE</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <section class="panel">
-    <div class="section-title"><span>MISSION LOG</span><span>SESSION</span></div>
-    <div class="tagline" id="log">System started. Awaiting first command.</div>
-  </section>
+    <section class="stats" aria-label="System status">
+      <div class="stat">
+        <div class="stat-label">LOCAL TIME</div>
+        <div class="stat-value" id="clock">--:--:--</div>
+        <div class="stat-sub" id="date">INITIALIZING DATE</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">AI CONNECTION</div>
+        <div class="stat-value" id="ai" style="font-size:17px">CHECKING</div>
+        <div class="stat-sub">GEMINI CLOUD BACKEND</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">VOICE MODE</div>
+        <div class="stat-value" id="voiceStatus" style="font-size:17px">ENABLED</div>
+        <div class="stat-sub" id="voiceSub">AUTOMATIC SPOKEN REPLIES</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">TASKS THIS SESSION</div>
+        <div class="stat-value" id="taskCount">00</div>
+        <div class="stat-sub">TEMPORARY SESSION STORAGE</div>
+      </div>
+    </section>
 
-  <footer>
-    J.A.R.V.I.S. PERSONAL PROJECT<br>
-    FRONTEND PROTOTYPE · CLOUD AI NOT YET CONNECTED<br>
-    EXCELSIOR
-  </footer>
-</div>
+    <section class="main-grid">
+      <div class="panel chat-panel">
+        <div class="panel-head">
+          <span>COMMAND CONSOLE // ENCRYPTED CHANNEL</span>
+          <div class="chat-tools"><span class="pulse"></span><span class="tiny-state" id="consoleStatus">READY</span></div>
+        </div>
+        <div id="messages" aria-live="polite">
+          <div class="message">
+            <span class="who">JARVIS // SYSTEM</span>
+            Good day, sir. My interface is online. I can answer questions through the cloud AI connection, and spoken responses are enabled by default. How may I be of assistance?
+          </div>
+        </div>
+        <form class="composer" id="chatForm">
+          <input id="command" name="command" type="text" autocomplete="off" placeholder="Enter a command or message..." aria-label="Message JARVIS" maxlength="2000" />
+          <button class="btn" type="submit">Transmit</button>
+          <button class="btn secondary" type="button" id="voice" title="Speak a command">Voice</button>
+        </form>
+        <div class="below-chat">
+          <button class="btn secondary" type="button" data-cmd="status">System status</button>
+          <button class="btn secondary" type="button" data-cmd="time">Time</button>
+          <button class="btn secondary" type="button" data-cmd="help">Help</button>
+          <button class="btn secondary" type="button" id="voiceToggle">Voice: ON</button>
+          <button class="btn secondary" type="button" id="clearChat">Clear console</button>
+        </div>
+      </div>
 
+      <aside class="side-stack">
+        <div class="panel">
+          <div class="panel-head"><span>QUICK COMMANDS</span><span>LOCAL</span></div>
+          <div class="panel-content">
+            <div class="command-list">
+              <div class="command-row"><code>status</code><button type="button" data-cmd="status">EXECUTE</button></div>
+              <div class="command-row"><code>time / date</code><button type="button" data-cmd="time">EXECUTE</button></div>
+              <div class="command-row"><code>new task</code><button type="button" data-cmd="new task">EXECUTE</button></div>
+              <div class="command-row"><code>help</code><button type="button" data-cmd="help">EXECUTE</button></div>
+              <div class="command-row"><code>be quiet</code><button type="button" data-cmd="be quiet">EXECUTE</button></div>
+              <div class="command-row"><code>resume voice</code><button type="button" data-cmd="resume voice">EXECUTE</button></div>
+            </div>
+          </div>
+        </div>
 
-<script>
-const $ = id => document.getElementById(id);
+        <div class="panel">
+          <div class="panel-head"><span>SYSTEM DIAGNOSTICS</span><span>STATUS</span></div>
+          <div class="panel-content">
+            <div class="system-line"><span>Interface</span><strong>ONLINE</strong></div>
+            <div class="system-line"><span>Cloud AI</span><strong id="diagAI" class="warn">NOT VERIFIED</strong></div>
+            <div class="system-line"><span>Speech output</span><strong id="diagSpeech">AVAILABLE CHECK PENDING</strong></div>
+            <div class="system-line"><span>Speech input</span><strong id="diagRecognition">CHECKING</strong></div>
+            <div class="divider"></div>
+            <p class="note">Privacy note: messages sent to the cloud AI are processed by the configured backend. Do not enter passwords, API keys, or other secrets into the chat. Tasks are stored only for the current page session.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
 
-let tasks = [];
-let recognition = null;
-let aiConnected = false;
-let isThinking = false;
+    <footer class="footer">
+      <span>J.A.R.V.I.S. PERSONAL INTERFACE // EXPERIMENTAL BUILD</span>
+      <span id="footerConnection">CLOUD AI AWAITING FIRST RESPONSE</span>
+    </footer>
+  </main>
 
-let voiceEnabled = true;
-let speechAvailable = 'speechSynthesis' in window;
+  <script>
+    const $ = id => document.getElementById(id);
 
-function speak(text) {
-  if (!voiceEnabled || !speechAvailable) return;
+    let tasks = [];
+    let recognition = null;
+    let aiConnected = false;
+    let isThinking = false;
+    let voiceEnabled = true;
 
-  window.speechSynthesis.cancel();
+    const speechAvailable = 'speechSynthesis' in window;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'en-US';
-  utterance.rate = 1.0;
-  utterance.pitch = 0.9;
-
-  window.speechSynthesis.speak(utterance);
-}
-
-function updateClock() {
-  const now = new Date();
-  const hour = now.getHours();
-
-  $('clock').textContent = now.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
-
-  $('date').textContent = now.toLocaleDateString([], {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric'
-  });
-
-  let greeting;
-
-  if (hour >= 5 && hour < 12) {
-    greeting = 'GOOD MORNING';
-  } else if (hour >= 12 && hour < 17) {
-    greeting = 'GOOD AFTERNOON';
-  } else if (hour >= 17 && hour < 21) {
-    greeting = 'GOOD EVENING';
-  } else {
-    greeting = 'GOOD NIGHT';
-  }
-
-  $('greeting').textContent = greeting;
-}
-
-updateClock();
-setInterval(updateClock, 1000);
-
-function setAIStatus(status, detail) {
-  $('ai').textContent = status;
-  const small = $('ai').parentElement.querySelector('.small');
-  if (small) small.textContent = detail;
-}
-
-function addMessage(who, text, user = false) {
-  const msg = document.createElement('div');
-  msg.className = 'message' + (user ? ' user' : '');
-
-  const label = document.createElement('span');
-  label.className = 'who';
-  label.textContent = who;
-
-  const body = document.createElement('div');
-  body.textContent = text;
-
-  msg.append(label, body);
-  $('messages').appendChild(msg);
-  $('messages').scrollTop = $('messages').scrollHeight;
-
-  $('log').textContent =
-    new Date().toLocaleTimeString() + ' — ' + who + ': ' + text;
-}
-
-function localCommand(command) {
-  const c = command.toLowerCase().trim();
-
-  if (c === 'time' || c === 'date') {
-    return 'Your device reports: ' + new Date().toLocaleString() + '.';
-  }
-
-  if (c === 'status') {
-    return 'Interface operational. ' +
-      (aiConnected
-        ? 'Cloud AI connection verified. '
-        : 'Cloud AI has not yet answered successfully in this session. ') +
-      'Tasks are stored only temporarily on this page.';
-  }
-
-  if (c === 'task' || c === 'new task') {
-    const task = prompt('Sir, what task shall I add?');
-
-    if (task && task.trim()) {
-      tasks.push(task.trim());
-      $('taskCount').textContent =
-        String(tasks.length).padStart(2, '0');
-
-      return 'Task added to this temporary session: ' +
-        task.trim() +
-        '. It will not persist after the page is reloaded.';
+    function setVoiceStatus() {
+      $('voiceStatus').textContent = voiceEnabled ? 'ENABLED' : 'TEXT ONLY';
+      $('voiceSub').textContent = voiceEnabled ? 'AUTOMATIC SPOKEN REPLIES' : 'SPEECH OUTPUT MUTED';
+      $('voiceToggle').textContent = voiceEnabled ? 'Voice: ON' : 'Voice: OFF';
+      $('voiceToggle').classList.toggle('active', voiceEnabled);
     }
 
-    return 'No task was added.';
-  }
+    function speak(text) {
+      if (!voiceEnabled || !speechAvailable || !text) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 1.0;
+        utterance.pitch = 0.9;
+        utterance.onstart = () => { $('state').textContent = 'SPEAKING...'; };
+        utterance.onend = () => {
+          if (!isThinking) $('state').textContent = 'JARVIS ONLINE';
+        };
+        utterance.onerror = () => {
+          $('state').textContent = 'JARVIS ONLINE';
+        };
+        window.speechSynthesis.speak(utterance);
+      } catch (error) {
+        console.warn('Speech output unavailable:', error);
+      }
+    }
 
-  if (c === 'help') {
-    return 'I can answer general questions using cloud AI. ' +
-      'Local commands include status, time, date, task, and help.';
-  }
+    function setAIStatus(status, detail) {
+      $('ai').textContent = status;
+      const small = $('ai').parentElement.querySelector('.stat-sub');
+      if (small && detail) small.textContent = detail.toUpperCase();
+      $('diagAI').textContent = status === 'CONNECTED' ? 'CONNECTED' : status;
+      $('diagAI').classList.toggle('warn', status !== 'CONNECTED');
+      $('topStatus').textContent = status === 'CONNECTED' ? 'ALL SYSTEMS NOMINAL' : 'SYSTEM STANDING BY';
+      $('footerConnection').textContent = status === 'CONNECTED' ? 'CLOUD AI CONNECTION VERIFIED' : 'CLOUD AI ' + status;
+    }
 
-  return null;
-}
+    function updateClock() {
+      const now = new Date();
+      const hour = now.getHours();
+      $('clock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      $('date').textContent = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+      $('greeting').textContent =
+        hour >= 5 && hour < 12 ? 'GOOD MORNING' :
+        hour >= 12 && hour < 17 ? 'GOOD AFTERNOON' :
+        hour >= 17 && hour < 21 ? 'GOOD EVENING' : 'GOOD NIGHT';
+    }
 
-async function askJARVIS(message) {
-  if (isThinking) {
-    addMessage(
-      'JARVIS // SYSTEM',
-      'One moment, sir. I am still processing your previous request.'
-    );
-    return;
-  }
+    function addMessage(who, text, user = false) {
+      const msg = document.createElement('div');
+      msg.className = 'message' + (user ? ' user' : '');
+      const label = document.createElement('span');
+      label.className = 'who';
+      label.textContent = who;
+      const body = document.createElement('div');
+      body.textContent = text;
+      msg.append(label, body);
+      $('messages').appendChild(msg);
+      $('messages').scrollTop = $('messages').scrollHeight;
+    }
 
-  isThinking = true;
-  $('state').textContent = 'PROCESSING REQUEST...';
-  setAIStatus('CONNECTING...', 'Contacting cloud AI');
+    function localCommand(command) {
+      const c = command.toLowerCase().trim();
 
-  const sendButton =
-    $('chatForm').querySelector('button[type="submit"]');
-  sendButton.disabled = true;
+      if (['be quiet', 'quiet mode', 'stop speaking', 'text only', 'voice off'].includes(c)) {
+        voiceEnabled = false;
+        if (speechAvailable) window.speechSynthesis.cancel();
+        setVoiceStatus();
+        return 'Understood, sir. I will remain in text-only mode until you tell me to resume voice.';
+      }
 
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ message })
+      if (['resume voice', 'enable voice', 'speak again', 'voice on'].includes(c)) {
+        voiceEnabled = true;
+        setVoiceStatus();
+        return 'Voice responses are enabled again, sir.';
+      }
+
+      if (c === 'time' || c === 'date') {
+        return 'Your device reports: ' + new Date().toLocaleString() + '.';
+      }
+
+      if (c === 'status') {
+        return 'Interface operational. ' +
+          (aiConnected ? 'Cloud AI connection verified. ' : 'Cloud AI has not yet answered successfully in this session. ') +
+          'Voice responses are ' + (voiceEnabled ? 'enabled.' : 'disabled.') +
+          ' Tasks are stored temporarily and will not persist after the page is closed or refreshed.';
+      }
+
+      if (c === 'task' || c === 'new task') {
+        const task = prompt('Sir, what task shall I add?');
+        if (task && task.trim()) {
+          tasks.push(task.trim());
+          $('taskCount').textContent = String(tasks.length).padStart(2, '0');
+          return 'Task added to this temporary session: ' + task.trim() + '.';
+        }
+        return 'No task was added.';
+      }
+
+      if (c === 'help') {
+        return 'I can answer general questions through cloud AI. Local commands include status, time, date, new task, help, be quiet, and resume voice.';
+      }
+
+      return null;
+    }
+
+    async function askJARVIS(message) {
+      if (isThinking) {
+        addMessage('JARVIS // SYSTEM', 'One moment, sir. I am still processing your previous request.');
+        return;
+      }
+
+      isThinking = true;
+      $('state').textContent = 'PROCESSING REQUEST...';
+      $('consoleStatus').textContent = 'PROCESSING';
+      setAIStatus('CONNECTING...', 'Contacting cloud AI');
+
+      const sendButton = $('chatForm').querySelector('button[type="submit"]');
+      sendButton.disabled = true;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error('The server returned an unreadable response. Please try again.');
+        }
+
+        if (!response.ok) {
+          throw new Error(data.details || data.error || 'The AI service returned an error (HTTP ' + response.status + ').');
+        }
+
+        if (typeof data.reply !== 'string' || !data.reply.trim()) {
+          throw new Error('The AI service returned an empty reply.');
+        }
+
+        aiConnected = true;
+        setAIStatus('CONNECTED', 'Cloud AI responding');
+        $('state').textContent = 'JARVIS ONLINE';
+        $('consoleStatus').textContent = 'READY';
+        addMessage('JARVIS', data.reply.trim());
+        speak(data.reply.trim());
+      } catch (error) {
+        $('state').textContent = 'CONNECTION ISSUE';
+        $('consoleStatus').textContent = 'ERROR';
+        setAIStatus('CONNECTION ERROR', 'Unable to complete AI request');
+
+        const errorMessage = 'Apologies, sir. I could not complete that request. ' +
+          (error.message || 'Please check your connection and try again.');
+        addMessage('JARVIS // SYSTEM', errorMessage);
+        speak(errorMessage);
+      } finally {
+        isThinking = false;
+        sendButton.disabled = false;
+        if ($('consoleStatus').textContent === 'PROCESSING') {
+          $('consoleStatus').textContent = 'READY';
+        }
+      }
+    }
+
+    async function respond(command) {
+      const message = command.trim();
+      if (!message) return;
+
+      addMessage('YOU', message, true);
+      const localAnswer = localCommand(message);
+
+      if (localAnswer !== null) {
+        addMessage('JARVIS', localAnswer);
+        speak(localAnswer);
+        return;
+      }
+
+      await askJARVIS(message);
+    }
+
+    $('chatForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const input = $('command');
+      const value = input.value.trim();
+      if (!value) return;
+      input.value = '';
+      await respond(value);
     });
 
-    const data = await response.json();
+    document.querySelectorAll('[data-cmd]').forEach(button => {
+      button.addEventListener('click', () => respond(button.dataset.cmd));
+    });
 
-    if (!response.ok) {
-      throw new Error(
-        data.details || data.error ||
-        'The AI service returned an error.'
-      );
+    $('voiceToggle').addEventListener('click', () => {
+      voiceEnabled = !voiceEnabled;
+      if (!voiceEnabled && speechAvailable) window.speechSynthesis.cancel();
+      setVoiceStatus();
+      addMessage('JARVIS // SYSTEM', voiceEnabled ? 'Voice output enabled.' : 'Voice output muted. Text responses will continue.');
+      if (voiceEnabled) speak('Voice output enabled.');
+    });
+
+    $('clearChat').addEventListener('click', () => {
+      $('messages').replaceChildren();
+      addMessage('JARVIS // SYSTEM', 'Console cleared, sir. Ready for your next command.');
+    });
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.continuous = false;
+
+      $('diagRecognition').textContent = 'AVAILABLE';
+
+      recognition.onstart = () => {
+        $('state').textContent = 'LISTENING...';
+        $('consoleStatus').textContent = 'LISTENING';
+      };
+
+      recognition.onresult = event => {
+        const transcript = event.results[0][0].transcript;
+        $('command').value = transcript;
+        $('state').textContent = 'PROCESSING VOICE...';
+        $('chatForm').requestSubmit();
+      };
+
+      recognition.onerror = () => {
+        $('state').textContent = 'VOICE INPUT UNAVAILABLE';
+        $('consoleStatus').textContent = 'READY';
+        addMessage('JARVIS // SYSTEM', 'Voice input did not work in this browser session. You can still type commands.');
+      };
+
+      recognition.onend = () => {
+        if ($('state').textContent === 'LISTENING...') $('state').textContent = 'JARVIS ONLINE';
+        $('consoleStatus').textContent = 'READY';
+      };
+
+      $('voice').addEventListener('click', () => {
+        try {
+          recognition.start();
+        } catch (_) {
+          $('state').textContent = 'VOICE BUSY — TRY AGAIN';
+        }
+      });
+    } else {
+      $('diagRecognition').textContent = 'NOT SUPPORTED';
+      $('voice').addEventListener('click', () => {
+        addMessage('JARVIS // SYSTEM', 'Voice recognition is not supported in this browser session. Please use the text command field.');
+      });
     }
 
-    if (typeof data.reply !== 'string' || !data.reply.trim()) {
-      throw new Error('The AI service returned an empty reply.');
-    }
+    $('diagSpeech').textContent = speechAvailable ? 'AVAILABLE' : 'NOT SUPPORTED';
+    if (!speechAvailable) $('diagSpeech').classList.add('warn');
 
-    aiConnected = true;
-    setAIStatus('CONNECTED', 'Cloud AI responding');
-    $('state').textContent = 'JARVIS ONLINE';
-
-    
-addMessage('JARVIS', data.reply.trim());
-speak(data.reply.trim());
-
-  } catch (error) {
-    $('state').textContent = 'CONNECTION ISSUE';
-    setAIStatus(
-      'CONNECTION ERROR',
-      'Unable to complete AI request'
-    );
-
-    addMessage(
-      'JARVIS // SYSTEM',
-      'Apologies, sir. I could not complete that request. ' +
-      (error.message ||
-        'Please check your connection and try again.')
-    );
-
-  } finally {
-    isThinking = false;
-}
-    sendButton.disabled = false;
-  }
-}
-
-async function respond(command) {
-  const message = command.trim();
-  if (!message) return;
-
-  addMessage('YOU', message, true);
-
-  const localAnswer = localCommand(message);
-
-  if (localAnswer !== null) {
-    addMessage('JARVIS', localAnswer);
-    return;
-  }
-
-  await askJARVIS(message);
-}
-
-$('chatForm').addEventListener('submit', async event => {
-  event.preventDefault();
-
-  const input = $('command');
-  const value = input.value.trim();
-
-  if (!value) return;
-
-  input.value = '';
-  await respond(value);
-});
-
-document.querySelectorAll('[data-cmd]').forEach(button => {
-  button.addEventListener('click', () => {
-    respond(button.dataset.cmd);
-  });
-});
-
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-
-if (SpeechRecognition) {
-  recognition = new SpeechRecognition();
-  recognition.lang = 'en-US';
-  recognition.interimResults = false;
-
-  recognition.onstart = () => {
-    $('state').textContent = 'LISTENING...';
-  };
-
-  recognition.onresult = event => {
-    $('command').value = event.results[0][0].transcript;
-    $('state').textContent = 'JARVIS ONLINE';
-    $('chatForm').requestSubmit();
-  };
-
-  recognition.onerror = () => {
-    $('state').textContent = 'VOICE UNAVAILABLE';
-  };
-
-  recognition.onend = () => {
-    if ($('state').textContent === 'LISTENING...') {
-      $('state').textContent = 'LOCAL SYSTEM READY';
-    }
-  };
-
-  $('voice').addEventListener('click', () => {
-    try {
-      recognition.start();
-    } catch (_) {
-      $('state').textContent = 'VOICE BUSY — TRY AGAIN';
-    }
-  });
-
-} else {
-  $('voice').addEventListener('click', () => {
-    addMessage(
-      'JARVIS',
-      'Voice recognition is not supported in this browser session. ' +
-      'Please use the text command field.'
-    );
-  });
-}
-</script>
-
+    updateClock();
+    setInterval(updateClock, 1000);
+    setVoiceStatus();
+    setAIStatus('NOT VERIFIED', 'Send a message to test cloud AI');
+  </script>
 </body>
 </html>
-
