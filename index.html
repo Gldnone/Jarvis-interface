@@ -267,60 +267,62 @@
       $('voiceToggle').classList.toggle('active', voiceEnabled);
     }
 
-   
-function speak(text) {
-  if (!voiceEnabled || !speechAvailable || !text) return;
+
+let currentJarvisAudio = null;
+
+async function speak(text) {
+  if (!voiceEnabled || !text) return;
 
   try {
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-
-    // Prefer a British English voice, ideally a male-sounding one.
-    const britishVoices = voices.filter(voice =>
-      /^en-GB/i.test(voice.lang) ||
-      /United Kingdom|Great Britain/i.test(voice.name)
-    );
-
-    const preferredVoice =
-      britishVoices.find(voice =>
-        /male|daniel|oliver|arthur|george|ryan|alfie/i.test(voice.name)
-      ) ||
-      britishVoices.find(voice =>
-        !/female|samantha|victoria|karen|moira/i.test(voice.name)
-      ) ||
-      britishVoices[0];
-
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-      utterance.lang = preferredVoice.lang;
-    } else {
-      utterance.lang = 'en-GB';
+    if (currentJarvisAudio) {
+      currentJarvisAudio.pause();
+      currentJarvisAudio.currentTime = 0;
+      currentJarvisAudio = null;
     }
 
-    // Calm, measured delivery without making him sound unnaturally slow.
-    utterance.rate = 0.92;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
+    window.speechSynthesis?.cancel();
+    $('state').textContent = 'GENERATING VOICE...';
 
-    utterance.onstart = () => {
+    const response = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Voice request failed: ${response.status}`);
+    }
+
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+
+    currentJarvisAudio = audio;
+
+    audio.onplay = () => {
       $('state').textContent = 'SPEAKING...';
     };
 
-    utterance.onend = () => {
+    audio.onended = () => {
+      URL.revokeObjectURL(audioUrl);
+      if (currentJarvisAudio === audio) currentJarvisAudio = null;
       if (!isThinking) $('state').textContent = 'JARVIS ONLINE';
     };
 
-    utterance.onerror = () => {
+    audio.onerror = () => {
+      URL.revokeObjectURL(audioUrl);
+      if (currentJarvisAudio === audio) currentJarvisAudio = null;
       if (!isThinking) $('state').textContent = 'JARVIS ONLINE';
+      console.error('Jarvis audio playback failed.');
     };
 
-    window.speechSynthesis.speak(utterance);
+    await audio.play();
   } catch (error) {
-    console.warn('Speech output unavailable:', error);
+    console.error('Jarvis voice error:', error);
+    if (!isThinking) $('state').textContent = 'JARVIS ONLINE';
   }
 }
+
 
 
     function setAIStatus(status, detail) {
