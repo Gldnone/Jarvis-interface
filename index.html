@@ -300,6 +300,22 @@ let recognition = null;
 let aiConnected = false;
 let isThinking = false;
 
+let voiceEnabled = true;
+let speechAvailable = 'speechSynthesis' in window;
+
+function speak(text) {
+  if (!voiceEnabled || !speechAvailable) return;
+
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 1.0;
+  utterance.pitch = 0.9;
+
+  window.speechSynthesis.speak(utterance);
+}
+
 function updateClock() {
   const now = new Date();
   const hour = now.getHours();
@@ -441,7 +457,9 @@ async function askJARVIS(message) {
     setAIStatus('CONNECTED', 'Cloud AI responding');
     $('state').textContent = 'JARVIS ONLINE';
 
-    addMessage('JARVIS', data.reply.trim());
+    
+addMessage('JARVIS', data.reply.trim());
+speak(data.reply.trim());
 
   } catch (error) {
     $('state').textContent = 'CONNECTION ISSUE';
@@ -459,6 +477,7 @@ async function askJARVIS(message) {
 
   } finally {
     isThinking = false;
+}
     sendButton.disabled = false;
   }
 }
