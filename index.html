@@ -226,7 +226,7 @@ footer {
   <section class="panel hero">
     <div class="label">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
     <div class="reactor"><div class="core"></div></div>
-    <h1>GOOD EVENING</h1>
+    <h1 id="greeting">GOOD DAY</h1>
     <div class="tagline">AT YOUR SERVICE, SIR.<br>AWAITING YOUR INSTRUCTIONS.</div>
     <div class="pill" id="state">LOCAL SYSTEM READY</div>
   </section>
@@ -291,112 +291,259 @@ footer {
   </footer>
 </div>
 
+
 <script>
 const $ = id => document.getElementById(id);
+
 let tasks = [];
 let recognition = null;
+let aiConnected = false;
+let isThinking = false;
 
 function updateClock() {
   const now = new Date();
+  const hour = now.getHours();
+
   $('clock').textContent = now.toLocaleTimeString([], {
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
   });
+
   $('date').textContent = now.toLocaleDateString([], {
-    weekday: 'short', month: 'short', day: 'numeric'
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
   });
+
+  let greeting;
+
+  if (hour >= 5 && hour < 12) {
+    greeting = 'GOOD MORNING';
+  } else if (hour >= 12 && hour < 17) {
+    greeting = 'GOOD AFTERNOON';
+  } else if (hour >= 17 && hour < 21) {
+    greeting = 'GOOD EVENING';
+  } else {
+    greeting = 'GOOD NIGHT';
+  }
+
+  $('greeting').textContent = greeting;
 }
+
 updateClock();
 setInterval(updateClock, 1000);
+
+function setAIStatus(status, detail) {
+  $('ai').textContent = status;
+  const small = $('ai').parentElement.querySelector('.small');
+  if (small) small.textContent = detail;
+}
 
 function addMessage(who, text, user = false) {
   const msg = document.createElement('div');
   msg.className = 'message' + (user ? ' user' : '');
+
   const label = document.createElement('span');
   label.className = 'who';
   label.textContent = who;
+
   const body = document.createElement('div');
   body.textContent = text;
+
   msg.append(label, body);
   $('messages').appendChild(msg);
   $('messages').scrollTop = $('messages').scrollHeight;
-  $('log').textContent = new Date().toLocaleTimeString() + ' — ' + who + ': ' + text;
+
+  $('log').textContent =
+    new Date().toLocaleTimeString() + ' — ' + who + ': ' + text;
 }
 
-function respond(command) {
+function localCommand(command) {
   const c = command.toLowerCase().trim();
-  if (!c) return;
-  addMessage('YOU', command, true);
-  let answer;
 
-  if (/\b(hello|hi|hey)\b/.test(c)) {
-    answer = 'Greetings, sir. JARVIS interface is ready. My cloud intelligence has not yet been connected.';
-  } else if (c.includes('time') || c.includes('date')) {
-    answer = 'Your device reports: ' + new Date().toLocaleString() + '.';
-  } else if (c.includes('status')) {
-    answer = 'Interface operational. Local commands enabled. Cloud AI, persistent cloud memory, and autonomous scheduling are not yet configured.';
-  } else if (c.includes('task')) {
-    const task = prompt('Sir, what task shall I add?');
-    if (task && task.trim()) {
-      tasks.push(task.trim());
-      $('taskCount').textContent = String(tasks.length).padStart(2, '0');
-      answer = 'Task added to this temporary session: ' + task.trim() + '. It will not persist after the page is reloaded.';
-    } else {
-      answer = 'No task was added.';
-    }
-  } else if (c.includes('help')) {
-    answer = 'Available demo commands: hello, status, time, date, task, and help. General AI reasoning will be available after the backend is connected.';
-  } else {
-    answer = 'I have received your command, sir, but the AI engine is not connected yet. For now, try status, time, task, or help.';
+  if (c === 'time' || c === 'date') {
+    return 'Your device reports: ' + new Date().toLocaleString() + '.';
   }
 
-  setTimeout(() => addMessage('JARVIS', answer), 180);
+  if (c === 'status') {
+    return 'Interface operational. ' +
+      (aiConnected
+        ? 'Cloud AI connection verified. '
+        : 'Cloud AI has not yet answered successfully in this session. ') +
+      'Tasks are stored only temporarily on this page.';
+  }
+
+  if (c === 'task' || c === 'new task') {
+    const task = prompt('Sir, what task shall I add?');
+
+    if (task && task.trim()) {
+      tasks.push(task.trim());
+      $('taskCount').textContent =
+        String(tasks.length).padStart(2, '0');
+
+      return 'Task added to this temporary session: ' +
+        task.trim() +
+        '. It will not persist after the page is reloaded.';
+    }
+
+    return 'No task was added.';
+  }
+
+  if (c === 'help') {
+    return 'I can answer general questions using cloud AI. ' +
+      'Local commands include status, time, date, task, and help.';
+  }
+
+  return null;
 }
 
-$('chatForm').addEventListener('submit', e => {
-  e.preventDefault();
+async function askJARVIS(message) {
+  if (isThinking) {
+    addMessage(
+      'JARVIS // SYSTEM',
+      'One moment, sir. I am still processing your previous request.'
+    );
+    return;
+  }
+
+  isThinking = true;
+  $('state').textContent = 'PROCESSING REQUEST...';
+  setAIStatus('CONNECTING...', 'Contacting cloud AI');
+
+  const sendButton =
+    $('chatForm').querySelector('button[type="submit"]');
+  sendButton.disabled = true;
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.details || data.error ||
+        'The AI service returned an error.'
+      );
+    }
+
+    if (typeof data.reply !== 'string' || !data.reply.trim()) {
+      throw new Error('The AI service returned an empty reply.');
+    }
+
+    aiConnected = true;
+    setAIStatus('CONNECTED', 'Cloud AI responding');
+    $('state').textContent = 'JARVIS ONLINE';
+
+    addMessage('JARVIS', data.reply.trim());
+
+  } catch (error) {
+    $('state').textContent = 'CONNECTION ISSUE';
+    setAIStatus(
+      'CONNECTION ERROR',
+      'Unable to complete AI request'
+    );
+
+    addMessage(
+      'JARVIS // SYSTEM',
+      'Apologies, sir. I could not complete that request. ' +
+      (error.message ||
+        'Please check your connection and try again.')
+    );
+
+  } finally {
+    isThinking = false;
+    sendButton.disabled = false;
+  }
+}
+
+async function respond(command) {
+  const message = command.trim();
+  if (!message) return;
+
+  addMessage('YOU', message, true);
+
+  const localAnswer = localCommand(message);
+
+  if (localAnswer !== null) {
+    addMessage('JARVIS', localAnswer);
+    return;
+  }
+
+  await askJARVIS(message);
+}
+
+$('chatForm').addEventListener('submit', async event => {
+  event.preventDefault();
+
   const input = $('command');
   const value = input.value.trim();
-  if (value) respond(value);
+
+  if (!value) return;
+
   input.value = '';
+  await respond(value);
 });
 
 document.querySelectorAll('[data-cmd]').forEach(button => {
   button.addEventListener('click', () => {
-    if (button.dataset.cmd === 'task') {
-      respond('task');
-    } else {
-      respond(button.dataset.cmd);
-    }
+    respond(button.dataset.cmd);
   });
 });
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+
 if (SpeechRecognition) {
   recognition = new SpeechRecognition();
   recognition.lang = 'en-US';
   recognition.interimResults = false;
-  recognition.onstart = () => $('state').textContent = 'LISTENING...';
-  recognition.onresult = e => {
-    $('command').value = e.results[0][0].transcript;
-    $('state').textContent = 'LOCAL SYSTEM READY';
+
+  recognition.onstart = () => {
+    $('state').textContent = 'LISTENING...';
+  };
+
+  recognition.onresult = event => {
+    $('command').value = event.results[0][0].transcript;
+    $('state').textContent = 'JARVIS ONLINE';
     $('chatForm').requestSubmit();
   };
-  recognition.onerror = () => $('state').textContent = 'VOICE UNAVAILABLE';
+
+  recognition.onerror = () => {
+    $('state').textContent = 'VOICE UNAVAILABLE';
+  };
+
   recognition.onend = () => {
     if ($('state').textContent === 'LISTENING...') {
       $('state').textContent = 'LOCAL SYSTEM READY';
     }
   };
+
   $('voice').addEventListener('click', () => {
-    try { recognition.start(); }
-    catch (_) { $('state').textContent = 'VOICE BUSY — TRY AGAIN'; }
+    try {
+      recognition.start();
+    } catch (_) {
+      $('state').textContent = 'VOICE BUSY — TRY AGAIN';
+    }
   });
+
 } else {
   $('voice').addEventListener('click', () => {
-    addMessage('JARVIS', 'Voice recognition is not supported in this browser session. Please use the text command field.');
+    addMessage(
+      'JARVIS',
+      'Voice recognition is not supported in this browser session. ' +
+      'Please use the text command field.'
+    );
   });
 }
 </script>
+
 </body>
 </html>
 
